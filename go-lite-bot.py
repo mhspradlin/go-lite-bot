@@ -47,16 +47,19 @@ image_dim = 1050
 # Name of the save file
 saved_board = 'saved_board.p'
 
+# Directory for save files
+save_dir = 'games/'
+
 # Represents the game state, which can be loaded from a file
-def get_board():
-    if os.path.isfile(saved_board):
-        f = open(saved_board, 'r')
+def get_board(filename):
+    if os.path.isfile(filename):
+        f = open(save_dir + filename, 'r')
         out = pickle.load(f)
         board = out
         f.close()
     else:
         board = Board(board_size)
-        f = open(saved_board, 'w')
+        f = open(save_dir + filename, 'w')
         pickle.dump(board, f)
         f.close()
     return board
@@ -67,8 +70,8 @@ def score_str(board):
   scores = board.score()
   return "Black: " + str(scores["Black"]) + " White: " + str(scores["White"])
 
-def save_board(board):
-    f = open(saved_board, 'w')
+def save_board(board, filename):
+    f = open(saved_board + filename, 'w')
     pickle.dump(board, f)
     f.close()
 
@@ -176,9 +179,11 @@ dispatcher.addTelegramCommandHandler('start', start)
 
 # Prints current game state
 def print_state(bot, update):
-    #print "Trying to send message: " + msg
+    # Load the board
+    board = get_board(update.message.chat_id)
+
     bot.sendMessage(chat_id=update.message.chat_id, text='```\n' +
-                        bot.board.board_str() + '```', parse_mode='Markdown')
+                        board.board_str() + '```', parse_mode='Markdown')
     global double_reset
     double_reset = False
 
@@ -195,22 +200,24 @@ def make_move(bot, update, args):
     if to_name(converted[0]) == None:
         return
 
+    # Load the board
+    board = get_board(update.message.chat_id)
+
     # If we want it to be empty, then make it so
     # If the space is already empty, do nothing
     if to_name(converted[0]) == Empty:
-        if bot.board.get(converted[1],converted[2]) == Empty:
+        if board.get(converted[1],converted[2]) == Empty:
             return
-        bot.board.set(to_name(converted[0]),converted[1],converted[2])
+        board.set(to_name(converted[0]),converted[1],converted[2])
 
     # If the space is empty, go there, otherwise do nothing
-    if bot.board.get(converted[1],converted[2]) == Empty:
-        bot.board.set(to_name(converted[0]), converted[1], converted[2])
+    if board.get(converted[1],converted[2]) == Empty:
+        board.set(to_name(converted[0]), converted[1], converted[2])
     else:
         return
 
     # Now that we've moved, save the board and send the new image
-    save_board(bot.board)
-    #print_state(bot, update)
+    save_board(board, update.message.chat_id)
     send_board_image(bot, update)
 
     # double_reset nonsense
@@ -248,12 +255,15 @@ def flood_space(bot, update, args):
     # We didn't get something that either represented White or Black
     if name != "Black" and name != "White":
         return
+
+    # Load the board
+    board = get_board(update.message.chat_id)
     
     # Check to see if we can flood, and return a message if not
-    if bot.board.can_flood(name, row, col):
-        bot.board.flood(name, row, col)
+    if board.can_flood(name, row, col):
+        board.flood(name, row, col)
         # Save things and send the image
-        save_board(bot.board)
+        save_board(board, update.message.chat_id)
         send_board_image(bot, update)
     else:
         bot.sendMessage(chat_id=update.message.chat_id, text="Cannot take starting at " + chr(int(col) + 97).upper() + str(row + 1))
@@ -357,7 +367,11 @@ def send_board_image(bot, update):
                     drawBlackAt(x - spacing / 2 + j * spacing, y - spacing / 2 + i * spacing, spacing) 
 
     wholesize = width * 0.6
-    drawBoardAt(width * 0.2, width * 0.2, wholesize, bot.board)
+
+    # Load the board
+    board = get_board(update.message.chat_id)
+
+    drawBoardAt(width * 0.2, width * 0.2, wholesize, board)
 
     output = StringIO.StringIO()
     img.save(output, 'PNG')
@@ -375,15 +389,19 @@ double_reset = False
 #Resets everything
 def reset_all(bot, update):
     global double_reset
+
+    # Load the board
+    board = get_board(update.message.chat_id)
+
     if double_reset:
-        if board_size != bot.board.size:
-            bot.board = Board(board_size)
-            save_board(bot.board)
+        if board_size != board.size:
+            board = Board(board_size)
+            save_board(board)
             double_reset = False
             send_board_image(bot, update)
         else:
-            bot.board.clear()
-            save_board(bot.board)
+            board.clear()
+            save_board(board)
             double_reset = False
             send_board_image(bot, update)
 
@@ -395,5 +413,5 @@ def confirm(bot, update):
 dispatcher.addTelegramCommandHandler("reset_all", confirm)
 dispatcher.addTelegramCommandHandler("confirm_reset", reset_all)
 
-updater.bot.board = get_board()
+# updater.bot.board = get_board()
 updater.start_polling()
