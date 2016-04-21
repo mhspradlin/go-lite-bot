@@ -56,13 +56,13 @@ mkdir(save_dir)
 # Represents the game state, which can be loaded from a file
 def get_board(filename):
     if os.path.isfile(filename):
-        f = open(save_dir + filename, 'r')
+        f = open(save_dir + filename + '.p', 'r')
         out = pickle.load(f)
         board = out
         f.close()
     else:
         board = Board(board_size)
-        f = open(save_dir + filename, 'w')
+        f = open(save_dir + filename + '.p', 'w')
         pickle.dump(board, f)
         f.close()
     return board
@@ -74,7 +74,7 @@ def score_str(board):
   return "Black: " + str(scores["Black"]) + " White: " + str(scores["White"])
 
 def save_board(board, filename):
-    f = open(saved_board + filename, 'w')
+    f = open(saved_board + filename + '.p', 'w')
     pickle.dump(board, f)
     f.close()
 
@@ -399,12 +399,12 @@ def reset_all(bot, update):
     if double_reset:
         if board_size != board.size:
             board = Board(board_size)
-            save_board(board)
+            save_board(board, update.message.chat_id)
             double_reset = False
             send_board_image(bot, update)
         else:
             board.clear()
-            save_board(board)
+            save_board(board, update.message.chat_id)
             double_reset = False
             send_board_image(bot, update)
 
