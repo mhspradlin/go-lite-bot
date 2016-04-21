@@ -291,7 +291,8 @@ def send_photo(bot, update):
     # Library code is broken...
     #bot.sendPhoto(chat_id=update.message.chat_id, photo=msg)
     #Workaround
-    print post_multipart('https://api.telegram.org/bot215378074:AAHv1Ks44hVQ2nfjqUbRtI6rfkcCtZqjxeU/sendPhoto'
+    global token
+    print post_multipart('https://api.telegram.org/bot' + token + '/sendPhoto'
             , [ ('chat_id', str(update.message.chat_id)) ]
             , [ ('photo', 'test-image.png', output.getvalue()) ])
     global double_reset
@@ -360,7 +361,8 @@ def send_board_image(bot, update):
 
     output = StringIO.StringIO()
     img.save(output, 'PNG')
-    post_multipart('https://api.telegram.org/bot215378074:AAHv1Ks44hVQ2nfjqUbRtI6rfkcCtZqjxeU/sendPhoto'
+    global token
+    post_multipart('https://api.telegram.org/bot' + token + '/sendPhoto'
             , [ ('chat_id', str(update.message.chat_id)) ]
             , [ ('photo', 'board-image.png', output.getvalue()) ])
     global double_reset
