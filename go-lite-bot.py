@@ -50,8 +50,9 @@ saved_board = 'saved_board.p'
 
 # Directory for save files
 save_dir = 'games/'
-# If it already exists, just silently fails
-mkdir(save_dir)
+# If it already exists, just passes
+if not os.path.isdir(save_dir):
+    mkdir(save_dir)
 
 # Represents the game state, which can be loaded from a file
 def get_board(filename):
