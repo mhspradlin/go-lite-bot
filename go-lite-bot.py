@@ -56,14 +56,14 @@ if not os.path.isdir(save_dir):
 
 # Represents the game state, which can be loaded from a file
 def get_board(filename):
-    if os.path.isfile(filename):
-        f = open(save_dir + filename + '.p', 'r')
+    if os.path.isfile(save_dir + str(filename) + '.p'):
+        f = open(save_dir + str(filename) + '.p', 'r')
         out = pickle.load(f)
         board = out
         f.close()
     else:
         board = Board(board_size)
-        f = open(save_dir + filename + '.p', 'w')
+        f = open(save_dir + str(filename) + '.p', 'w')
         pickle.dump(board, f)
         f.close()
     return board
@@ -75,7 +75,7 @@ def score_str(board):
   return "Black: " + str(scores["Black"]) + " White: " + str(scores["White"])
 
 def save_board(board, filename):
-    f = open(saved_board + filename + '.p', 'w')
+    f = open(saved_board + str(filename) + '.p', 'w')
     pickle.dump(board, f)
     f.close()
 
