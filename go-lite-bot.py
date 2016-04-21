@@ -56,7 +56,7 @@ if not os.path.isdir(save_dir):
 
 # Represents the game state, which can be loaded from a file
 def get_board(filename):
-    if os.path.isfile(filename):
+    if os.path.isfile(save_dir + filename + '.p'):
         f = open(save_dir + filename + '.p', 'r')
         out = pickle.load(f)
         board = out
