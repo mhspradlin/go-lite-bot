@@ -75,7 +75,7 @@ def score_str(board):
   return "Black: " + str(scores["Black"]) + " White: " + str(scores["White"])
 
 def save_board(board, filename):
-    f = open(saved_board + filename + '.p', 'w')
+    f = open(save_dir + filename + '.p', 'w')
     pickle.dump(board, f)
     f.close()
 
