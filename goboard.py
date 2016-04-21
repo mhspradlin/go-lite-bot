@@ -1,3 +1,6 @@
+# Double-ended queue for the flooding mechanism
+from collections import deque
+
 # The way we will handle representing the game board is in two ways - 
 # a graph of piece spaces which are linked to the adjacent spaces, and a 
 # two dimensional list which allows direct numerical 
