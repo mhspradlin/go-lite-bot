@@ -20,7 +20,7 @@ import StringIO
 
 # So we can save the board
 import os.path
-import os.mkdir
+from os import mkdir
 import pickle
 
 # So we can pick random colors
@@ -51,7 +51,7 @@ saved_board = 'saved_board.p'
 # Directory for save files
 save_dir = 'games/'
 # If it already exists, just silently fails
-os.mkdir(save_dir)
+mkdir(save_dir)
 
 # Represents the game state, which can be loaded from a file
 def get_board(filename):
