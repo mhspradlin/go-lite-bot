@@ -325,7 +325,7 @@ def send_board_image(bot, update):
     # Load the board
     board = get_board(update.message.chat_id)
     
-    image_dim = (board.size + 2) * 75 / 0.6
+    image_dim = (board.size + 2) * 125
     
     width  = image_dim
     height = image_dim
