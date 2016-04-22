@@ -365,7 +365,7 @@ def send_board_image(bot, update):
         # Also, note that there are size - 2 boxes in each dimension to make the correct number
         # of crossed spaces
         numBoxes = board.size - 1
-        spacing = wholelen / numBoxes
+        spacing = space_width
 
         # We need a background to be able to see the white pieces
         draw.rectangle([x - spacing * 1.5, y - spacing * 1.5, x + wholelen +
