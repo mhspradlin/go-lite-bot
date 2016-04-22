@@ -343,7 +343,7 @@ def send_board_image(bot, update):
         #Outline
         linewd = int(board.size / 6) * 2
         draw.rectangle([ x, y, x + edgelen, y + edgelen]
-                       , fill = "none"
+                       , fill = None
                        , outline = "black")
 
     # Note that the circles are specified from their upper left corner
