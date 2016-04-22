@@ -325,13 +325,16 @@ dispatcher.addTelegramCommandHandler("photo", send_photo)
 
 # Sends an image of the game board
 def send_board_image(bot, update):
+    # Load the board
+    board = get_board(update.message.chat_id)
+    
     width  = image_dim
     height = image_dim
 
     img    = Image.new("RGB", (width, height), color="hsl(" + str(random.randrange(0,361)) + ", 100%, 80%)")
     draw   = ImageDraw.Draw(img)
-    font   = ImageFont.truetype("Lato-Regular.ttf", 40)
-    font2  = ImageFont.truetype("Lato-Regular.ttf", 16)
+    # Since 1 pt ~= 0.75px, adjust the font size as such
+    font   = ImageFont.truetype("Lato-Regular.ttf", 0.5 * 0.75 * height / board.size)
     def drawBoxAt(x, y, edgelen):
         #Outline
         draw.line([ (x, y), (x + edgelen, y), (x + edgelen, y + edgelen)
@@ -395,9 +398,6 @@ def send_board_image(bot, update):
                     drawBlackAt(x - spacing / 2 + j * spacing, y - spacing / 2 + i * spacing, spacing) 
 
     wholesize = width * 0.6
-
-    # Load the board
-    board = get_board(update.message.chat_id)
 
     drawBoardAt(width * 0.2, width * 0.2, wholesize, board)
 
