@@ -333,8 +333,8 @@ def send_board_image(bot, update):
 
     img    = Image.new("RGB", (width, height), color="hsl(" + str(random.randrange(0,361)) + ", 100%, 80%)")
     draw   = ImageDraw.Draw(img)
-    # Since 1 pt ~= 0.75px, adjust the font size as such
-    font   = ImageFont.truetype("Lato-Regular.ttf", 0.5 * 0.75 * height / board.size)
+    font   = ImageFont.truetype("Lato-Regular.ttf", 40)
+
     def drawBoxAt(x, y, edgelen):
         #Outline
         draw.line([ (x, y), (x + edgelen, y), (x + edgelen, y + edgelen)
