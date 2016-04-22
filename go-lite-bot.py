@@ -369,12 +369,12 @@ def send_board_image(bot, update):
 
         # Draw the labels
         for i in range(board.size):
-            draw.text( ( x - spacing + font.getsize(str(board.size + 1))[0] / 2
+            draw.text( ( x - spacing + font.getsize(str(i + 1))[0] / 2
                        , y - font.getsize(str(i + 1))[1] / 2 + i * spacing )
                      , str(i + 1)
                      , fill = 'black'
                      , font = font )
-            draw.text( ( x + wholelen + spacing / 2
+            draw.text( ( x + wholelen + spacing / 2 - font.getsize(str(i+1))[0] / 2
                        , y - font.getsize(str(i + 1))[1] / 2 + i * spacing )
                      , str(i + 1)
                      , fill = 'black'
@@ -386,7 +386,7 @@ def send_board_image(bot, update):
                      , fill = 'black'
                      , font = font )
             draw.text( ( x - font.getsize(chr(i + 97).upper())[0] / 2 + i * spacing
-                       , y + wholelen + spacing - font.getsize(chr(i + 97).upper())[1] )
+                       , y + wholelen + spacing - font.getsize('M')[1] )
                      , chr(i + 97).upper()
                      , fill = 'black'
                      , font = font )
