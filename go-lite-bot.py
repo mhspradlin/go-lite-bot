@@ -341,8 +341,15 @@ def send_board_image(bot, update):
 
     def drawBoxAt(x, y, edgelen):
         #Outline
-        draw.line([ (x, y), (x + edgelen, y), (x + edgelen, y + edgelen)
-                  , (x, y + edgelen), (x,y) ], fill = "black", width = int((board.size - 3) / 4))
+        linewd = int(board.size / 6) * 2
+        lw = linewd
+        draw.line( [ (x - lw, y - lw)
+                   , (x + edgelen + 2 * lw, y - lw)
+                   , (x + edgelen + 2 * lw, y + edgelen + 2 * lw)
+                   , (x - lw, y + edgelen + 2 * lw)
+                   , (x - lw, y - lw) ]
+                 , fill = "black"
+                 , width = linewd)
 
     # Note that the circles are specified from their upper left corner
     def drawWhiteAt(x, y, cellwidth):
