@@ -374,7 +374,7 @@ def send_board_image(bot, update):
                      , str(i + 1)
                      , fill = 'black'
                      , font = font )
-            draw.text( ( x + wholelen + spacing / 2 - font.getsize(str(i+1))[0] / 2
+            draw.text( ( x + wholelen + spacing - 3 * font.getsize(str(i+1))[0] / 2
                        , y - font.getsize(str(i + 1))[1] / 2 + i * spacing )
                      , str(i + 1)
                      , fill = 'black'
