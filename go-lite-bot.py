@@ -342,12 +342,11 @@ def send_board_image(bot, update):
     def drawBoxAt(x, y, edgelen):
         #Outline
         linewd = int(board.size / 6) * 2
-        lw = linewd
-        draw.line( [ (x - lw, y - lw)
-                   , (x + edgelen + 2 * lw, y - lw)
-                   , (x + edgelen + 2 * lw, y + edgelen + 2 * lw)
-                   , (x - lw, y + edgelen + 2 * lw)
-                   , (x - lw, y - lw) ]
+        draw.line( [ (x, y)
+                   , (x + edgelen, y)
+                   , (x + edgelen, y + edgelen)
+                   , (x, y + edgelen)
+                   , (x, y) ]
                  , fill = "black"
                  , width = linewd)
 
