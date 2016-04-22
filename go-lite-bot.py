@@ -331,9 +331,11 @@ def send_board_image(bot, update):
     width  = image_dim
     height = image_dim
 
+    wholesize = width * 0.6
+
     img    = Image.new("RGB", (width, height), color="hsl(" + str(random.randrange(0,361)) + ", 100%, 80%)")
     draw   = ImageDraw.Draw(img)
-    font   = ImageFont.truetype("Lato-Regular.ttf", 0.75 * 0.5 * (height / (board.size - 1)))
+    font   = ImageFont.truetype("Lato-Regular.ttf", int(0.5 * (wholesize / (board.size - 1))))
 
     def drawBoxAt(x, y, edgelen):
         #Outline
@@ -396,9 +398,7 @@ def send_board_image(bot, update):
                     drawWhiteAt(x - spacing / 2 + j * spacing, y - spacing / 2 + i * spacing, spacing)
                 elif board.get(i,j) == "Black":
                     drawBlackAt(x - spacing / 2 + j * spacing, y - spacing / 2 + i * spacing, spacing) 
-
-    wholesize = width * 0.6
-
+                    
     drawBoardAt(width * 0.2, width * 0.2, wholesize, board)
 
     output = StringIO.StringIO()
