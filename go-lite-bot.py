@@ -21,13 +21,10 @@ import StringIO
 # So we can save the board
 import os.path
 from os import mkdir
-import pickle
+import cPickle as pickle
 
 # So we can pick random colors
 import random 
-
-# Double-ended queue for the flooding mechanism
-from collections import deque
 
 # Create our Updater
 # For ease of configuration, we pull our token from a text file located in the same directory
@@ -36,17 +33,17 @@ token = f.readline().strip()
 f.close()
 updater = Updater(token = token)
 
+# Initialize our double reset dict
+updater.bot.double_resets = {}
+
 # Convenience for the dispatcher?
 dispatcher = updater.dispatcher
 
 # Size of the board
-board_size = 9
+default_board_size = 9
 
 # Image dimensions
 image_dim = 1050
-
-# Name of the save file
-saved_board = 'saved_board.p'
 
 # Directory for save files
 save_dir = 'games/'
@@ -57,14 +54,18 @@ if not os.path.isdir(save_dir):
 # Represents the game state, which can be loaded from a file
 def get_board(filename):
     if os.path.isfile(save_dir + str(filename) + '.p'):
-        f = open(save_dir + str(filename) + '.p', 'r')
-        out = pickle.load(f)
+        f = open(save_dir + str(filename) + '.p', 'rb')
+        try:
+            out = pickle.load(f)
+        except:
+            print("Error loading!")
+            return Board(default_board_size)
         board = out
         f.close()
     else:
-        board = Board(board_size)
-        f = open(save_dir + str(filename) + '.p', 'w')
-        pickle.dump(board, f)
+        board = Board(default_board_size)
+        f = open(save_dir + str(filename) + '.p', 'wb')
+        pickle.dump(board, f, pickle.HIGHEST_PROTOCOL)
         f.close()
     return board
 
@@ -75,8 +76,12 @@ def score_str(board):
   return "Black: " + str(scores["Black"]) + " White: " + str(scores["White"])
 
 def save_board(board, filename):
-    f = open(save_dir + str(filename) + '.p', 'w')
-    pickle.dump(board, f)
+    f = open(save_dir + str(filename) + '.p', 'wb')
+    try:
+        pickle.dump(board, f, pickle.HIGHEST_PROTOCOL)
+    except Exception as ex:
+        print("Error saving!")
+        print("exception: " + str(ex))
     f.close()
 
 # This was taken from the web, and I can't remember where from.
@@ -127,13 +132,13 @@ def encode_multipart_formdata(fields, files):
 
 # End borrowing
  
-def are_indices(argList):
+def are_indices(argList, size):
     if len(argList) != 3:
         return False
     try:
         i = int(argList[1])
         j = int(argList[2])
-        if (i <= board_size and j <= board_size and i >= 0 and j >= 0):
+        if (i <= size and j <= size and i >= 0 and j >= 0):
             return True
         return False
     except ValueError:
@@ -188,24 +193,24 @@ def print_state(bot, update):
 
     bot.sendMessage(chat_id=update.message.chat_id, text='```\n' +
                         board.board_str() + '```', parse_mode='Markdown')
-    global double_reset
-    double_reset = False
+    bot.double_resets[str(update.message.chat_id)] = False
 
 dispatcher.addTelegramCommandHandler('getState', print_state)
 
 # Makes a move
 def make_move(bot, update, args):
+    # Load the board
+    board = get_board(update.message.chat_id)
+
     converted = convert_move(args)
-    if ((len(args) != 3 and len(args) != 2) or (not are_indices(converted))):
+    if ((len(args) != 3 and len(args) != 2) or 
+            (not are_indices(converted, board.size))):
         print "Got bad input"
         return
 
     # We didn't get something that either represented White or Black
     if to_name(converted[0]) == None:
         return
-
-    # Load the board
-    board = get_board(update.message.chat_id)
 
     # If we want it to be empty, then make it so
     # If the space is already empty, do nothing
@@ -225,8 +230,7 @@ def make_move(bot, update, args):
     send_board_image(bot, update)
 
     # double_reset nonsense
-    global double_reset
-    double_reset = False
+    bot.double_resets[str(update.message.chat_id)] = False
 
 def bmove(bot, update, args):
     make_move(bot, update, ["Black"] + args)
@@ -247,8 +251,12 @@ dispatcher.addTelegramCommandHandler('moveO', omove)
 
 # Tries to flood for a player
 def flood_space(bot, update, args):
+    # Load the board
+    board = get_board(update.message.chat_id)
+
     converted = convert_move(args)
-    if ((len(args) != 3 and len(args) != 2) or (not are_indices(converted))):
+    if ((len(args) != 3 and len(args) != 2) 
+            or (not are_indices(converted, board.size))):
         print "Got bad input"
         return
 
@@ -273,8 +281,7 @@ def flood_space(bot, update, args):
         bot.sendMessage(chat_id=update.message.chat_id, text="Cannot take starting at " + chr(int(col) + 97).upper() + str(row + 1))
 
     # double_reset nonsense
-    global double_reset
-    double_reset = False
+    bot.double_resets[str(update.message.chat_id)] = False
 
 def bflood(bot, update, args):
     flood_space(bot, update, ["Black"] + args)
@@ -309,8 +316,9 @@ def send_photo(bot, update):
     print post_multipart('https://api.telegram.org/bot' + token + '/sendPhoto'
             , [ ('chat_id', str(update.message.chat_id)) ]
             , [ ('photo', 'test-image.png', output.getvalue()) ])
-    global double_reset
-    double_reset = False
+
+    # double_reset nonsense
+    bot.double_resets[str(update.message.chat_id)] = False
 
 dispatcher.addTelegramCommandHandler("photo", send_photo)
 
@@ -356,11 +364,27 @@ def send_board_image(bot, update):
 
         # Draw the labels
         for i in range(board.size):
-            draw.text((x - spacing + font.getsize("D")[0] / 2, y - font.getsize(str(i + 1))[1] / 2 + i * spacing), str(i + 1), fill = 'black', font = font)
-            draw.text((x + wholelen + spacing - 3 * font.getsize("D")[0] / 2, y - font.getsize(str(i + 1))[1] / 2 + i * spacing), str(i + 1), fill = 'black', font = font)
+            draw.text( ( x - spacing + font.getsize(str(board.size + 1))[0] / 2
+                       , y - font.getsize(str(i + 1))[1] / 2 + i * spacing )
+                     , str(i + 1)
+                     , fill = 'black'
+                     , font = font )
+            draw.text( ( x + wholelen + spacing - 3 * font.getsize(str(board.size + 1))[0] / 2
+                       , y - font.getsize(str(i + 1))[1] / 2 + i * spacing )
+                     , str(i + 1)
+                     , fill = 'black'
+                     , font = font )
         for i in range(board.size):
-            draw.text((x - font.getsize(chr(i + 97).upper())[0] / 2 + i * spacing, y - spacing), chr(i + 97).upper(), fill = 'black', font = font)
-            draw.text((x - font.getsize(chr(i + 97).upper())[0] / 2 + i * spacing, y + wholelen + spacing - font.getsize(chr(i + 97).upper())[1]), chr(i + 97).upper(), fill = 'black', font = font)
+            draw.text( ( x - font.getsize(chr(i + 97).upper())[0] / 2 + i * spacing
+                       , y - spacing )
+                     , chr(i + 97).upper()
+                     , fill = 'black'
+                     , font = font )
+            draw.text( ( x - font.getsize(chr(i + 97).upper())[0] / 2 + i * spacing
+                       , y + wholelen + spacing - font.getsize(chr(i + 97).upper())[1] )
+                     , chr(i + 97).upper()
+                     , fill = 'black'
+                     , font = font )
         
         # Now we step over the spaces and draw the pieces if need be
         for i in range(board.size):
@@ -383,39 +407,81 @@ def send_board_image(bot, update):
     post_multipart('https://api.telegram.org/bot' + token + '/sendPhoto'
             , [ ('chat_id', str(update.message.chat_id)) ]
             , [ ('photo', 'board-image.png', output.getvalue()) ])
-    global double_reset
-    double_reset = False
+
+    # double_reset nonsense
+    bot.double_resets[str(update.message.chat_id)] = False
 
 dispatcher.addTelegramCommandHandler("game", send_board_image)
 
-double_reset = False
-
 #Resets everything
 def reset_all(bot, update):
-    global double_reset
+
+    # Check our state
+    double_reset = bot.double_resets[str(update.message.chat_id)]
 
     # Load the board
     board = get_board(update.message.chat_id)
 
-    if double_reset:
-        if board_size != board.size:
-            board = Board(board_size)
-            save_board(board, update.message.chat_id)
-            double_reset = False
-            send_board_image(bot, update)
-        else:
-            board.clear()
-            save_board(board, update.message.chat_id)
-            double_reset = False
-            send_board_image(bot, update)
+    if double_reset == True:
+        board.clear()
+        save_board(board, update.message.chat_id)
+        bot.double_resets[str(update.message.chat_id)] = False
+        send_board_image(bot, update)
 
 def confirm(bot, update):
-    global double_reset
-    double_reset = True;
-    bot.sendMessage(chat_id=update.message.chat_id, text="Send confirm_reset command to reset game state.")
+    bot.double_resets[str(update.message.chat_id)] = True;
+    bot.sendMessage( chat_id=update.message.chat_id
+                   , text="Send confirm_reset command to reset game state.")
 
 dispatcher.addTelegramCommandHandler("reset_all", confirm)
 dispatcher.addTelegramCommandHandler("confirm_reset", reset_all)
 
-# updater.bot.board = get_board()
+# Creates a new game, resizing the board possibly
+# Shares the double_reset variable with reset_all
+def new_game(bot, update):
+    # Check our state
+    double_reset = bot.double_resets[str(update.message.chat_id)]
+
+    # Load the board
+    board = get_board(update.message.chat_id)
+
+    # If double_reset is a number
+    if double_reset != True and double_reset != False:
+        # Create a new board and save it
+        # Otherwise just clear it
+        if board.size != double_reset:
+            board = Board(double_reset)
+        else:
+            board.clear()
+
+        save_board(board, update.message.chat_id)
+        bot.double_resets[str(update.message.chat_id)] = False
+        send_board_image(bot, update)
+
+def confirm_resize(bot, update, args):
+        # See if the number input was valid
+        # Only allow a 19 x 19 board (arbitrarily chosen)
+        try:
+            if (len(args) == 1):
+                new_size = int(args[0])
+        except:
+            bot.sendMessage( chat_id=update.message.chat_id
+                           , text="Please provide a valid number for the new board size.")
+            return
+
+        # Check to make sure the number is okay
+        if new_size not in [7, 9, 13, 17, 19]:
+            bot.sendMessage( chat_id=update.message.chat_id
+                           , text="Please provide a valid number for the new board size.")
+            return
+
+        # Remember this number by putting it into the dictionary and ask for
+        # confirmation
+        bot.double_resets[str(update.message.chat_id)] = new_size
+        bot.sendMessage( chat_id=update.message.chat_id
+                       , text="Send the confirm_new command to start a new game.")
+
+dispatcher.addTelegramCommandHandler("new_game", confirm_resize)
+dispatcher.addTelegramCommandHandler("confirm_new", new_game)
+
 updater.start_polling()
