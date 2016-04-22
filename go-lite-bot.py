@@ -333,7 +333,7 @@ def send_board_image(bot, update):
     width  = image_dim
     height = image_dim
 
-    wholesize = width - space_width
+    wholesize = width - space_width * 4
 
     img    = Image.new("RGB", (width, height), color="hsl(" + str(random.randrange(0,361)) + ", 100%, 80%)")
     draw   = ImageDraw.Draw(img)
