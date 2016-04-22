@@ -326,12 +326,14 @@ def send_board_image(bot, update):
     # Load the board
     board = get_board(update.message.chat_id)
     
-    image_dim = (board.size + 3) * 75
+    space_width = 75
+    
+    image_dim = (board.size + 3) * space_width
     
     width  = image_dim
     height = image_dim
 
-    wholesize = width - 75
+    wholesize = width - space_width
 
     img    = Image.new("RGB", (width, height), color="hsl(" + str(random.randrange(0,361)) + ", 100%, 80%)")
     draw   = ImageDraw.Draw(img)
@@ -399,7 +401,7 @@ def send_board_image(bot, update):
                 elif board.get(i,j) == "Black":
                     drawBlackAt(x - spacing / 2 + j * spacing, y - spacing / 2 + i * spacing, spacing) 
                     
-    drawBoardAt(width * 0.2, width * 0.2, wholesize, board)
+    drawBoardAt(space_width * 2, space_width * 2, wholesize, board)
 
     output = StringIO.StringIO()
     img.save(output, 'PNG')
