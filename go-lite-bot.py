@@ -369,7 +369,7 @@ def send_board_image(bot, update):
                      , str(i + 1)
                      , fill = 'black'
                      , font = font )
-            draw.text( ( x + wholelen + spacing - 3 * font.getsize(str(board.size + 1))[0] / 2
+            draw.text( ( x + wholelen + spacing / 2
                        , y - font.getsize(str(i + 1))[1] / 2 + i * spacing )
                      , str(i + 1)
                      , fill = 'black'
@@ -460,7 +460,7 @@ def new_game(bot, update):
 
 def confirm_resize(bot, update, args):
         # See if the number input was valid
-        # Only allow a 19 x 19 board (arbitrarily chosen)
+        # Only allow up to a 19 x 19 board (arbitrarily chosen)
         try:
             if (len(args) == 1):
                 new_size = int(args[0])
