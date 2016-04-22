@@ -17,6 +17,7 @@ import uuid
 # So we can draw the board
 from PIL import Image, ImageDraw, ImageFont
 import StringIO
+from math import ceil
 
 # So we can save the board
 import os.path
@@ -325,12 +326,12 @@ def send_board_image(bot, update):
     # Load the board
     board = get_board(update.message.chat_id)
     
-    image_dim = (board.size + 2) * 125
+    image_dim = (board.size + 3) * 75
     
     width  = image_dim
     height = image_dim
 
-    wholesize = width * 0.6
+    wholesize = width - 75
 
     img    = Image.new("RGB", (width, height), color="hsl(" + str(random.randrange(0,361)) + ", 100%, 80%)")
     draw   = ImageDraw.Draw(img)
@@ -339,7 +340,7 @@ def send_board_image(bot, update):
     def drawBoxAt(x, y, edgelen):
         #Outline
         draw.line([ (x, y), (x + edgelen, y), (x + edgelen, y + edgelen)
-                  , (x, y + edgelen), (x,y) ], fill = "black", width = 3)
+                  , (x, y + edgelen), (x,y) ], fill = "black", width = ceil(board.size / 4))
 
     # Note that the circles are specified from their upper left corner
     def drawWhiteAt(x, y, cellwidth):
