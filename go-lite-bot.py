@@ -42,9 +42,6 @@ dispatcher = updater.dispatcher
 # Size of the board
 default_board_size = 9
 
-# Image dimensions
-image_dim = 1050
-
 # Directory for save files
 save_dir = 'games/'
 # If it already exists, just passes
@@ -328,6 +325,8 @@ def send_board_image(bot, update):
     # Load the board
     board = get_board(update.message.chat_id)
     
+    image_dim = (board.size + 2) * 75
+    
     width  = image_dim
     height = image_dim
 
@@ -369,12 +368,12 @@ def send_board_image(bot, update):
 
         # Draw the labels
         for i in range(board.size):
-            draw.text( ( x - spacing + font.getsize(str(i + 1))[0] / 2
+            draw.text( ( x - spacing - font.getsize(str(i + 1))[0] / 2
                        , y - font.getsize(str(i + 1))[1] / 2 + i * spacing )
                      , str(i + 1)
                      , fill = 'black'
                      , font = font )
-            draw.text( ( x + wholelen + spacing - 3 * font.getsize(str(i+1))[0] / 2
+            draw.text( ( x + wholelen + spacing -  font.getsize(str(i+1))[0] / 2
                        , y - font.getsize(str(i + 1))[1] / 2 + i * spacing )
                      , str(i + 1)
                      , fill = 'black'
