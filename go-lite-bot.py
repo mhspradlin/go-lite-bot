@@ -2,6 +2,12 @@
 
 # Python backend for go-lite-bot, the small Go bot
 
+# Should really use the fnctl package with the flock() function
+# to place locks on the files being read. Setting read/write locks as appropriate
+# will allow multiple instances to access the same filesystem for reading and
+# writing files. A really extensible solution might access a database
+# instead, but that's not necessary for now.
+
 # Import the Updater class from the nice telegram API wrapper
 from telegram.ext import Updater
 
@@ -326,6 +332,7 @@ def send_board_image(bot, update):
     # Load the board
     board = get_board(update.message.chat_id)
     
+    # Empirically determined, this seems to look fine with the JPG compression that Telegram does
     space_width = 60
     
     image_dim = (board.size + 3) * space_width
