@@ -211,21 +211,36 @@ def make_move(bot, update, args):
             (not are_indices(converted, board.size))):
         print "Got bad input"
         return
+    
+    # Name our positions
+    name = to_name(converted[0])
+    row = converted[1]
+    col = converted[2]
 
     # We didn't get something that either represented White or Black
-    if to_name(converted[0]) == None:
+    if name == None:
         return
 
     # If we want it to be empty, then make it so
     # If the space is already empty, do nothing
-    if to_name(converted[0]) == Empty:
-        if board.get(converted[1],converted[2]) == Empty:
+    if name == Empty:
+        if board.get(row,col) == Empty:
             return
-        board.set(to_name(converted[0]),converted[1],converted[2])
+        board.set(name,row,col)
 
     # If the space is empty, go there, otherwise do nothing
-    if board.get(converted[1],converted[2]) == Empty:
-        board.set(to_name(converted[0]), converted[1], converted[2])
+    if board.get(row,col) == Empty:
+        board.set(name,row,col)
+        # If we went there, take any zones that are now surrounded by the player
+        # can_flood handles out of bounds indices nicely, so don't need to filter
+        # them here
+        for roff in range(-1,2):
+            for coff in range(-1,2):
+                if board.can_flood(name, row + roff, col + coff):
+                    board.flood(name, row + roff, col + coff)
+        # Save things and send the image
+        save_board(board, update.message.chat_id)
+        send_board_image(bot, update)
     else:
         return
 
