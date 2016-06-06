@@ -238,9 +238,6 @@ def make_move(bot, update, args):
             for coff in range(-1,2):
                 if board.can_flood(name, row + roff, col + coff):
                     board.flood(name, row + roff, col + coff)
-        # Save things and send the image
-        save_board(board, update.message.chat_id)
-        send_board_image(bot, update)
     else:
         return
 
