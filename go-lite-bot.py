@@ -12,7 +12,7 @@
 from telegram.ext import Updater
 
 # Our game-board abstraction
-from goboard import Node, Empty, Board
+from board import Node, Empty, Board
 
 # From the muiltipart business
 import httplib
@@ -190,17 +190,6 @@ def start(bot, update):
 
 dispatcher.addTelegramCommandHandler('start', start)
 
-# Prints current game state
-def print_state(bot, update):
-    # Load the board
-    board = get_board(update.message.chat_id)
-
-    bot.sendMessage(chat_id=update.message.chat_id, text='```\n' +
-                        board.board_str() + '```', parse_mode='Markdown')
-    bot.double_resets[str(update.message.chat_id)] = False
-
-dispatcher.addTelegramCommandHandler('getState', print_state)
-
 # Makes a move
 def make_move(bot, update, args):
     # Load the board
@@ -212,6 +201,9 @@ def make_move(bot, update, args):
         print "Got bad input"
         return
     
+    # The date of the update for our journal
+    date = update.date
+
     # Name our positions
     name = to_name(converted[0])
     row = converted[1]
@@ -221,25 +213,8 @@ def make_move(bot, update, args):
     if name == None:
         return
 
-    # If we want it to be empty, then make it so
-    # If the space is already empty, do nothing
-    if name == Empty:
-        if board.get(row,col) == Empty:
-            return
-        board.set(name,row,col)
-
-    # If the space is empty, go there, otherwise do nothing
-    if board.get(row,col) == Empty:
-        board.set(name,row,col)
-        # If we went there, take any zones that are now surrounded by the player
-        # can_flood handles out of bounds indices nicely, so don't need to filter
-        # them here
-        for roff in range(-1,2):
-            for coff in range(-1,2):
-                if board.can_flood(name, row + roff, col + coff):
-                    board.flood(name, row + roff, col + coff)
-    else:
-        return
+    # Apply the move
+    board.addEvent((date, events.move, (name, row, col)))
 
     # Now that we've moved, save the board and send the new image
     save_board(board, update.message.chat_id)
@@ -252,8 +227,6 @@ def bmove(bot, update, args):
     make_move(bot, update, ["Black"] + args)
 def wmove(bot, update, args):
     make_move(bot, update, ["White"] + args)
-def omove(bot, update, args):
-    make_move(bot, update, ["o"] + args)
 
 dispatcher.addTelegramCommandHandler('move', make_move)
 dispatcher.addTelegramCommandHandler('bmove', bmove)
@@ -262,82 +235,6 @@ dispatcher.addTelegramCommandHandler('BMove', bmove)
 dispatcher.addTelegramCommandHandler('wmove', wmove)
 dispatcher.addTelegramCommandHandler('Wmove', wmove)
 dispatcher.addTelegramCommandHandler('WMove', wmove)
-dispatcher.addTelegramCommandHandler('moveo', omove)
-dispatcher.addTelegramCommandHandler('moveO', omove)
-
-# Tries to flood for a player
-def flood_space(bot, update, args):
-    # Load the board
-    board = get_board(update.message.chat_id)
-
-    converted = convert_move(args)
-    if ((len(args) != 3 and len(args) != 2) 
-            or (not are_indices(converted, board.size))):
-        print "Got bad input"
-        return
-
-    name = to_name(converted[0])
-    row = converted[1]
-    col = converted[2]
-
-    # We didn't get something that either represented White or Black
-    if name != "Black" and name != "White":
-        return
-
-    # Load the board
-    board = get_board(update.message.chat_id)
-    
-    # Check to see if we can flood, and return a message if not
-    if board.can_flood(name, row, col):
-        board.flood(name, row, col)
-        # Save things and send the image
-        save_board(board, update.message.chat_id)
-        send_board_image(bot, update)
-    else:
-        bot.sendMessage(chat_id=update.message.chat_id, text="Cannot take starting at " + chr(int(col) + 97).upper() + str(row + 1))
-
-    # double_reset nonsense
-    bot.double_resets[str(update.message.chat_id)] = False
-
-def bflood(bot, update, args):
-    flood_space(bot, update, ["Black"] + args)
-def wflood(bot, update, args):
-    flood_space(bot, update, ["White"] + args)
-
-dispatcher.addTelegramCommandHandler('btake', bflood)
-dispatcher.addTelegramCommandHandler('bTake', bflood)
-dispatcher.addTelegramCommandHandler('Btake', bflood)
-dispatcher.addTelegramCommandHandler('BTake', bflood)
-dispatcher.addTelegramCommandHandler('wtake', wflood)
-dispatcher.addTelegramCommandHandler('wTake', wflood)
-dispatcher.addTelegramCommandHandler('Wtake', wflood)
-dispatcher.addTelegramCommandHandler('WTake', wflood)
-dispatcher.addTelegramCommandHandler('take' , flood_space)
-
-# Sends a photo
-def send_photo(bot, update):
-    img = Image.new('RGB', (512, 512))
-    pixels = [i + j for i in range(512) for j in range(512)]
-    img.putdata(pixels)
-    output = StringIO.StringIO()
-    img.save(output, 'PNG')
-    #msg = encode_multipart_formdata(
-    #        [ ('chat-id', str(update.message.chat_id)) ]
-    #        , [ ('photo', 'test-image.png', output.getvalue()) ])
-    #print msg
-    # Library code is broken...
-    #bot.sendPhoto(chat_id=update.message.chat_id, photo=msg)
-    #Workaround
-    global token
-    print post_multipart('https://api.telegram.org/bot' + token + '/sendPhoto'
-            , [ ('chat_id', str(update.message.chat_id)) ]
-            , [ ('photo', 'test-image.png', output.getvalue()) ])
-
-    # double_reset nonsense
-    bot.double_resets[str(update.message.chat_id)] = False
-
-dispatcher.addTelegramCommandHandler("photo", send_photo)
-
 
 # Sends an image of the game board
 def send_board_image(bot, update):
@@ -436,29 +333,6 @@ def send_board_image(bot, update):
 
 dispatcher.addTelegramCommandHandler("game", send_board_image)
 
-#Resets everything
-def reset_all(bot, update):
-
-    # Check our state
-    double_reset = bot.double_resets[str(update.message.chat_id)]
-
-    # Load the board
-    board = get_board(update.message.chat_id)
-
-    if double_reset == True:
-        board.clear()
-        save_board(board, update.message.chat_id)
-        bot.double_resets[str(update.message.chat_id)] = False
-        send_board_image(bot, update)
-
-def confirm(bot, update):
-    bot.double_resets[str(update.message.chat_id)] = True;
-    bot.sendMessage( chat_id=update.message.chat_id
-                   , text="Send confirm_reset command to reset game state.")
-
-dispatcher.addTelegramCommandHandler("reset_all", confirm)
-dispatcher.addTelegramCommandHandler("confirm_reset", reset_all)
-
 # Creates a new game, resizing the board possibly
 # Shares the double_reset variable with reset_all
 def new_game(bot, update):
@@ -482,11 +356,15 @@ def new_game(bot, update):
         send_board_image(bot, update)
 
 def confirm_resize(bot, update, args):
-        # See if the number input was valid
+        # See if the number input was valid (or no number was input)
         # Only allow up to a 19 x 19 board (arbitrarily chosen)
         try:
-            if (len(args) == 1):
+            if (len(args) == 0):
+                new_size = get_board(update.message.chat_id).size
+            else if (len(args) == 1):
                 new_size = int(args[0])
+            else:
+                raise Exception("Invalid number of arguments to new_game")
         except:
             bot.sendMessage( chat_id=update.message.chat_id
                            , text="Please provide a valid number for the new board size.")
