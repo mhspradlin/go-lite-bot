@@ -149,7 +149,7 @@ class Board:
             (date, evt, args) = evts[i]
             if (evt == events.undo):
                 evtList.pop()
-            else if (evt == events.move):
+            elif (evt == events.move):
                 evtList.push(args)
             else: # Something went wrong
                 print("Unsupported event in buildGame")
