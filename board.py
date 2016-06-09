@@ -151,6 +151,8 @@ class Board:
                 evtList.pop()
             elif (evt == events.move):
                 evtList.append(args)
+            elif (len(evtList) == 0):
+                pass
             else: # Something went wrong
                 print("Unsupported event in buildGame")
                 return
