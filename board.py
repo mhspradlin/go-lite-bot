@@ -147,7 +147,7 @@ class Board:
         evtList = []
         for i in range(len(evts)):
             (date, evt, args) = evts[i]
-            if (evt == events.undo):
+            if (evt == events.undo and len(evtList) > 0):
                 evtList.pop()
             elif (evt == events.move):
                 evtList.append(args)
