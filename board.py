@@ -22,7 +22,6 @@ import events
 class Empty:
     pass
 
-
 class Node:
 
     def __init__ (self, player=Empty):
@@ -192,3 +191,7 @@ class Board:
     def addEvent (self, evt):
         self.store.insert(evt)
         self.buildGame(self.store.journal())
+
+# Orders moves by UNIX time
+def orderMoves ((date1, evt1, args1), (date2, evt2, args2)):
+    return date1 < date2
