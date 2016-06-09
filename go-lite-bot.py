@@ -36,6 +36,9 @@ import random
 # Events names
 import events
 
+# To lock and unlock files
+import fcntl
+
 # Create our Updater
 # For ease of configuration, we pull our token from a text file located in the same directory
 f = open('token.txt', 'r')
@@ -62,18 +65,19 @@ if not os.path.isdir(save_dir):
 def get_board(filename):
     if os.path.isfile(save_dir + str(filename) + '.p'):
         f = open(save_dir + str(filename) + '.p', 'rb')
+        fcntl.flock(f, fcntl.LOCK_EX)
         try:
             out = pickle.load(f)
         except:
             print("Error loading!")
             return Board(default_board_size)
         board = out
-        f.close()
     else:
         board = Board(default_board_size)
         f = open(save_dir + str(filename) + '.p', 'wb')
         pickle.dump(board, f, pickle.HIGHEST_PROTOCOL)
-        f.close()
+    fcntl.flock(f, fcntl.LOCK_UN)
+    f.close()
     return board
 
 # Helper fuctions
@@ -84,11 +88,13 @@ def score_str(board):
 
 def save_board(board, filename):
     f = open(save_dir + str(filename) + '.p', 'wb')
+    fcntl.flock(f, fcntl.LOCK_EX)
     try:
         pickle.dump(board, f, pickle.HIGHEST_PROTOCOL)
     except Exception as ex:
         print("Error saving!")
         print("exception: " + str(ex))
+    fcntl.flock(f, fcntl.LOCK_UN)
     f.close()
 
 # This was taken from the web, and I can't remember where from.
