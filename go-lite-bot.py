@@ -246,6 +246,26 @@ dispatcher.addTelegramCommandHandler('wmvoe', wmove)
 dispatcher.addTelegramCommandHandler('Wmvoe', wmove)
 dispatcher.addTelegramCommandHandler('WMvoe', wmove)
 
+# Undo the last action
+def undo (bot, update, args):
+    # Load the board
+    board = get_board(update.message.chat_id)
+
+    # The date of the update for our journal
+    # The update_id is an authoritative ordering like a date
+    date = update.update_id
+
+    # Apply the move
+    board.addEvent((date, events.undo, None))
+
+    # Now that we've moved, save the board and send the new image
+    save_board(board, update.message.chat_id)
+    send_board_image(bot, update)
+
+    # double_reset nonsense
+    bot.double_resets[str(update.message.chat_id)] = False
+
+dispatcher.addTelegramCommandHandler('undo', undo)
 
 # Sends an image of the game board
 def send_board_image(bot, update):
