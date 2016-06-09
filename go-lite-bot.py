@@ -235,6 +235,13 @@ dispatcher.addTelegramCommandHandler('BMove', bmove)
 dispatcher.addTelegramCommandHandler('wmove', wmove)
 dispatcher.addTelegramCommandHandler('Wmove', wmove)
 dispatcher.addTelegramCommandHandler('WMove', wmove)
+dispatcher.addTelegramCommandHandler('bmvoe', bmove)
+dispatcher.addTelegramCommandHandler('Bmvoe', bmove)
+dispatcher.addTelegramCommandHandler('BMvoe', bmove)
+dispatcher.addTelegramCommandHandler('wmvoe', wmove)
+dispatcher.addTelegramCommandHandler('Wmvoe', wmove)
+dispatcher.addTelegramCommandHandler('WMvoe', wmove)
+
 
 # Sends an image of the game board
 def send_board_image(bot, update):
