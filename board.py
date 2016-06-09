@@ -1,7 +1,7 @@
 # Contains the Board class, which makes heavy use of the Store abstraction.
 
 # Get the journal store
-from python-journal-store.journal-store import Store
+from store import Store
 
 # Double-ended queue for the flooding mechanism
 from collections import deque
