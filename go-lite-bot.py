@@ -368,7 +368,7 @@ def confirm_resize(bot, update, args):
         try:
             if (len(args) == 0):
                 new_size = get_board(update.message.chat_id).size
-            else if (len(args) == 1):
+            elif (len(args) == 1):
                 new_size = int(args[0])
             else:
                 raise Exception("Invalid number of arguments to new_game")
