@@ -17,16 +17,17 @@ import events
 # values of None (as appropriate, a corner will only have two Nones, for example)
 # and the board will be initialized for all self.player values to be Empty but with
 # the adjacent spaces linked up correctly.
+# A class (using it like a type) to represent a space where no piece has gone
+# Could be a string, but this is a little nicer
+class Empty:
+    pass
+
+
 class Node:
 
     def __init__ (self, player=Empty):
         self.player = player
         self.adjacent = []
-
-# A class (using it like a type) to represent a space where no piece has gone
-# Could be a string, but this is a little nicer
-class Empty:
-    pass
 
 # A class to represent a whole board
 # Defining it with a field for size to allow for alteration of the board size later
