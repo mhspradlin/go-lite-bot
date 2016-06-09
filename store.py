@@ -27,25 +27,25 @@ class Store:
     # Insert an element to the journal
     def insert (self, elem):
         if (self.orderFunc != None):
-            print(self.orderFunc)
-            print(self.journal)
-            print(elem)
             # If we can add to the end, do so (constant time)
-            if (len(self.journal) == 0 or self.orderFunc(self.journal[len(self.journal)-1],elem)):
+            if (len(self.journal) == 0 or 
+                self.orderFunc(self.journal[len(self.journal)-1],elem)):
                 self.journal.append(elem)
             else: # Walk backwards until we can insert (linear time)
                 i = len(self.journal) - 2
-                while (self.orderFunc(elem, self.journal[i])):
+                while (self.orderFunc(elem, self.journal[i]) and
+                       i >= 0):
                     i -= 1
                 self.journal.insert(i+1,elem)
-            print(self.journal)
             return True
         else: # Hope there's a < operation (should catch errors)
-            if (self.journal[len(self.journal)-1] < elem):
+            if (len(self.journal) == 0 or
+                self.journal[len(self.journal)-1] < elem):
                 self.journal.append(elem)
             else:
                 i = len(self.journal) - 2
-                while (elem < self.journal[i]):
+                while (elem < self.journal[i] and
+                       i >= 0):
                     i -= 1
                 self.journal.insert(i+1,elem)
             return True

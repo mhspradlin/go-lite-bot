@@ -147,7 +147,6 @@ class Board:
         evtList = []
         for i in range(len(evts)):
             (date, evt, args) = evts[i]
-            print((date,evt,args))
             if (evt == events.undo):
                 evtList.pop()
             elif (evt == events.move):
@@ -174,7 +173,6 @@ class Board:
         # Note that all events here are now moves (3-tuples)
         for i in range(len(evtList)):
             args = evtList[i]
-            print(args)
             name, row, col = args[0], args[1], args[2]
             # If the space is empty, go there, otherwise do nothing
             if self.get(row,col) == Empty:
