@@ -32,7 +32,7 @@ class Store:
                 self.journal.append(elem)
             else: # Walk backwards until we can insert (linear time)
                 i = len(self.journal) - 2
-                while (self.orderFunc(elem, self.journal[i]):
+                while (self.orderFunc(elem, self.journal[i])):
                     i -= 1
                 self.journal.insert(i+1,elem)
             return True
