@@ -33,6 +33,9 @@ import cPickle as pickle
 # So we can pick random colors
 import random 
 
+# Events names
+import events
+
 # Create our Updater
 # For ease of configuration, we pull our token from a text file located in the same directory
 f = open('token.txt', 'r')
@@ -202,7 +205,8 @@ def make_move(bot, update, args):
         return
     
     # The date of the update for our journal
-    date = update.date
+    # The update_id is an authoritative ordering like a date
+    date = update.update_id
 
     # Name our positions
     name = to_name(converted[0])

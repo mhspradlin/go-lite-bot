@@ -37,7 +37,7 @@ class Board:
     def __init__ (self, size):
         self.size = size
         self.store = Store(orderMoves)
-        self.buildGame(self.store.journal())
+        self.buildGame(self.store.log())
 
     # Clears a board
     # Just set everything to Empty, no need to reallocate memory
@@ -147,32 +147,34 @@ class Board:
         evtList = []
         for i in range(len(evts)):
             (date, evt, args) = evts[i]
+            print((date,evt,args))
             if (evt == events.undo):
                 evtList.pop()
             elif (evt == events.move):
-                evtList.push(args)
+                evtList.append(args)
             else: # Something went wrong
                 print("Unsupported event in buildGame")
                 return
         # Now actually apply the events one at a time
         # We should return a shortcut array here with interlinked nodes
         # Empty array
-        self.shortcut = [[Node() for x in range(size)] for x in range(size)]
-        for i in range(size):
-            for j in range(size):
+        self.shortcut = [[Node() for x in range(self.size)] for x in range(self.size)]
+        for i in range(self.size):
+            for j in range(self.size):
                 if j > 0:
                     self.shortcut[i][j].adjacent.append((i,j-1))
                 if i > 0:
                     self.shortcut[i][j].adjacent.append((i-1,j))
-                if j < size - 1:
+                if j < self.size - 1:
                     self.shortcut[i][j].adjacent.append((i,j+1))
-                if i < size - 1:
+                if i < self.size - 1:
                     self.shortcut[i][j].adjacent.append((i+1,j))
         
         # Applying the moves
         # Note that all events here are now moves (3-tuples)
         for i in range(len(evtList)):
             args = evtList[i]
+            print(args)
             name, row, col = args[0], args[1], args[2]
             # If the space is empty, go there, otherwise do nothing
             if self.get(row,col) == Empty:
@@ -190,7 +192,7 @@ class Board:
     # This is the method that should be used to add events, not get/set
     def addEvent (self, evt):
         self.store.insert(evt)
-        self.buildGame(self.store.journal())
+        self.buildGame(self.store.log())
 
 # Orders moves by UNIX time
 def orderMoves ((date1, evt1, args1), (date2, evt2, args2)):
