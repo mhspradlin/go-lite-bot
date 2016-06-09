@@ -255,10 +255,10 @@ def undo (bot, update, args):
     # The update_id is an authoritative ordering like a date
     date = update.update_id
 
-    # Apply the move
+    # Apply the undo
     board.addEvent((date, events.undo, None))
 
-    # Now that we've moved, save the board and send the new image
+    # Now that we've undoed, save the board and send the new image
     save_board(board, update.message.chat_id)
     send_board_image(bot, update)
 
