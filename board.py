@@ -205,11 +205,13 @@ class Board:
         sendImage = True
         for i in range(len(evts)):
             (date, evt, args) = evts[i]
+            print(evts[i])
             if (evt == events.undo and len(evtList) > 0):
                 evtList.pop()
                 empty()
                 build(evtList)
             elif (evt == events.move):
+                print("Making move")
                 name, row, col = args[0], args[1], args[2]
                 # If there isn't already something there and it's within
                 # bounds
@@ -221,7 +223,8 @@ class Board:
                 elif (i == len(evts) - 1):
                     # If the last event is invalid, say so
                     sendImage = False
-                # Else just ignore
+                else: # Just ignore
+                    print("Invalid move")
             elif (len(evtList) == 0):
                 pass
             else: # Something went wrong
