@@ -251,6 +251,9 @@ dispatcher.addTelegramCommandHandler('BMvoe', bmove)
 dispatcher.addTelegramCommandHandler('wmvoe', wmove)
 dispatcher.addTelegramCommandHandler('Wmvoe', wmove)
 dispatcher.addTelegramCommandHandler('WMvoe', wmove)
+# And shortcuts!
+dispatcher.addTelegramCommandHandler('b', bmove)
+dispatcher.addTelegramCommandHandler('w', wmove)
 
 # Undo the last action
 def undo (bot, update, args):
