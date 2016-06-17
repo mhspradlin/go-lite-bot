@@ -214,6 +214,8 @@ class Board:
                 build(evtList)
             elif (evt == events.move):
                 print("Making move")
+                print(self.shortcut)
+                print(self.shortcut[row][col])
                 name, row, col = args[0], args[1], args[2]
                 # If there isn't already something there and it's within
                 # bounds
