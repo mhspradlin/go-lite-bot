@@ -399,17 +399,16 @@ def new_game(bot, update):
 def confirm_resize(bot, update, args):
         # See if the number input was valid (or no number was input)
         # Only allow up to a 19 x 19 board (arbitrarily chosen)
-        
-            if (len(args) == 0): # Don't change the size
-                new_size = get_board(update.message.chat_id).size
-                bot.double_resets[str(update.message.chat_id)] = new_size
-            elif (len(args) == 1):
-                try:
-                    new_size = int(args[0])
-                except:
-                    bot.sendMessage( chat_id=update.message.chat_id
-                                , text="Please provide a valid number for the new board size.")
-                    return      
+        if (len(args) == 0): # Don't change the size
+            new_size = get_board(update.message.chat_id).size
+            bot.double_resets[str(update.message.chat_id)] = new_size
+        elif (len(args) == 1):
+            try:
+                new_size = int(args[0])
+            except:
+                bot.sendMessage( chat_id=update.message.chat_id
+                            , text="Please provide a valid number for the new board size.")
+                return      
 
         # Check to make sure the number is okay
         if new_size not in [7, 9, 13, 17, 19]:
