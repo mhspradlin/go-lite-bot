@@ -183,9 +183,7 @@ class Board:
             name, row, col = move[0], move[1], move[2]
             # We already checked to make sure the space is empty, so we can
             # apply
-            print("Setting space")
             self.set(name,row,col)
-            print("Space set")
             # If we went there, take any zones that are now surrounded 
             # by the player
             # can_flood handles out of bounds indices nicely, so don't 
@@ -213,24 +211,18 @@ class Board:
                 empty()
                 build(evtList)
             elif (evt == events.move):
-                print("Making move")
-                print(self.shortcut)
-                print(self.shortcut[row][col])
                 name, row, col = args[0], args[1], args[2]
                 # If there isn't already something there and it's within
                 # bounds
-                if (self.shortcut[row][col] == Empty and
+                if (self.shortcut[row][col].player == Empty and
                     row < self.size and col < self.size and
                     row >= 0 and col >= 0):
-                    print("Applying move")
                     evtList.append(args)
                     makeMove(args)
                 elif (i == len(evts) - 1):
                     # If the last event is invalid, say so
-                    print("Invalid last")
                     sendImage = False
                 else: # Just ignore
-                    print("Invalid move")
             elif (len(evtList) == 0):
                 pass
             else: # Something went wrong
