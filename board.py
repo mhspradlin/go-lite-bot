@@ -197,7 +197,8 @@ class Board:
         def build (evtList):
             # Applying the moves
             # Note that all events here are now moves (3-tuples)
-            makeMove(evtList[i]) for i in range(len(evtList))
+            for i in range(len(evtList)):
+                makeMove(evtList[i])
 
         empty()
         evtList = []
