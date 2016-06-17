@@ -162,8 +162,7 @@ class Board:
         #       of allocating the space for a whole board. So, it consumes
         #       dramatically more memory and the speed benefits are not clear.
         
-        # Now actually apply the events one at a time
-        
+        # Empty the shortcut array
         def empty ():
             # We should return a shortcut array here with interlinked nodes
             # Empty array
@@ -179,6 +178,7 @@ class Board:
                     if i < self.size - 1:
                         self.shortcut[i][j].adjacent.append((i+1,j))
         
+        # Add a single move to the shortcut array
         def makeMove (move):
             name, row, col = move[0], move[1], move[2]
             # We already checked to make sure the space is empty, so we can
@@ -197,9 +197,7 @@ class Board:
         def build (evtList):
             # Applying the moves
             # Note that all events here are now moves (3-tuples)
-            for i in range(len(evtList)):
-                move = evtList[i]
-                makeMove(move)
+            makeMove(evtList[i]) for i in range(len(evtList))
 
         empty()
         evtList = []
@@ -211,7 +209,7 @@ class Board:
                 empty()
                 build(evtList)
             elif (evt == events.move):
-                name, row, col = move[0], move[1], move[2]
+                name, row, col = args[0], args[1], args[2]
                 # If there isn't already something there and it's within
                 # bounds
                 if (self.shortcut[row][col] == Empty and
