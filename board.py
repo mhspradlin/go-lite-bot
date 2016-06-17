@@ -141,57 +141,103 @@ class Board:
 
     # The buildGame function which builds the game out of an ordered list of 
     # Events. Updates the shortcut array in place.
+    # Also returns a value that indicates if the last move (of this log)
+    # is a duplicate move.
     def buildGame (self,evts):
-        # First we need to walk the events and remove all those which were undoed
+        # First we need to walk the events and remove all those which were
+        # duplicate moves or undoed
+        # To check for duplicates, we build up the game board in concert with
+        # processing events. If we reach an undo, we remove the event and
+        # rebuild the board.
+        # Advantages:
+        #   - Not keeping lots of copies of the game board around
+        #   - Undoes are common, but usually take up a minority of the events
+        # Disadvantages:
+        #   - Building the board multiple times, which is especially expensive
+        #       for undoes near the end of the game.
+        # Other approach:
+        #   - Save all copies of the game board as you build, so an undo only
+        #       rolls back one board. This seemingly comes with a lower
+        #       complexity, but each copy of the board comes with the burden
+        #       of allocating the space for a whole board. So, it consumes
+        #       dramatically more memory and the speed benefits are not clear.
+        
+        # Now actually apply the events one at a time
+        
+        def empty ():
+            # We should return a shortcut array here with interlinked nodes
+            # Empty array
+            self.shortcut = [[Node() for x in range(self.size)] for x in range(self.size)]
+            for i in range(self.size):
+                for j in range(self.size):
+                    if j > 0:
+                        self.shortcut[i][j].adjacent.append((i,j-1))
+                    if i > 0:
+                        self.shortcut[i][j].adjacent.append((i-1,j))
+                    if j < self.size - 1:
+                        self.shortcut[i][j].adjacent.append((i,j+1))
+                    if i < self.size - 1:
+                        self.shortcut[i][j].adjacent.append((i+1,j))
+        
+        def makeMove (move):
+            name, row, col = move[0], move[1], move[2]
+            # We already checked to make sure the space is empty, so we can
+            # apply
+            self.set(name,row,col)
+            # If we went there, take any zones that are now surrounded 
+            # by the player
+            # can_flood handles out of bounds indices nicely, so don't 
+            # need to filter them here
+            for roff in range(-1,2):
+                for coff in range(-1,2):
+                    if self.can_flood(name, row + roff, col + coff):
+                        self.flood(name, row + roff, col + coff)
+
+        # Applies the moves, assuming there are no undoes
+        def build (evtList):
+            # Applying the moves
+            # Note that all events here are now moves (3-tuples)
+            for i in range(len(evtList)):
+                move = evtList[i]
+                makeMove(move)
+
+        empty()
         evtList = []
+        sendImage = True
         for i in range(len(evts)):
             (date, evt, args) = evts[i]
             if (evt == events.undo and len(evtList) > 0):
                 evtList.pop()
+                empty()
+                build(evtList)
             elif (evt == events.move):
-                evtList.append(args)
+                name, row, col = move[0], move[1], move[2]
+                # If there isn't already something there and it's within
+                # bounds
+                if (self.shortcut[row][col] == Empty and
+                    row < self.size and col < self.size and
+                    row >= 0 and col >= 0):
+                    evtList.append(args)
+                    makeMove(args)
+                elif (i == len(evts) - 1):
+                    # If the last event is invalid, say so
+                    sendImage = False
+                # Else just ignore
             elif (len(evtList) == 0):
                 pass
             else: # Something went wrong
                 print("Unsupported event in buildGame")
-                return
-        # Now actually apply the events one at a time
-        # We should return a shortcut array here with interlinked nodes
-        # Empty array
-        self.shortcut = [[Node() for x in range(self.size)] for x in range(self.size)]
-        for i in range(self.size):
-            for j in range(self.size):
-                if j > 0:
-                    self.shortcut[i][j].adjacent.append((i,j-1))
-                if i > 0:
-                    self.shortcut[i][j].adjacent.append((i-1,j))
-                if j < self.size - 1:
-                    self.shortcut[i][j].adjacent.append((i,j+1))
-                if i < self.size - 1:
-                    self.shortcut[i][j].adjacent.append((i+1,j))
+                sendImage = False
         
-        # Applying the moves
-        # Note that all events here are now moves (3-tuples)
-        for i in range(len(evtList)):
-            args = evtList[i]
-            name, row, col = args[0], args[1], args[2]
-            # If the space is empty, go there, otherwise do nothing
-            if self.get(row,col) == Empty:
-                self.set(name,row,col)
-                # If we went there, take any zones that are now surrounded 
-                # by the player
-                # can_flood handles out of bounds indices nicely, so don't 
-                # need to filter them here
-                for roff in range(-1,2):
-                    for coff in range(-1,2):
-                        if self.can_flood(name, row + roff, col + coff):
-                            self.flood(name, row + roff, col + coff)
+        # Report if we should respond
+        return sendImage
         
     # Adds an event to the journal and rebuilds the shortcut array
     # This is the method that should be used to add events, not get/set
+    # Returns whether or not a board image should be sent
     def addEvent (self, evt):
         self.store.insert(evt)
-        self.buildGame(self.store.log())
+        return self.buildGame(self.store.log())
 
 # Orders moves by UNIX time
 def orderMoves ((date1, evt1, args1), (date2, evt2, args2)):

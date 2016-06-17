@@ -223,12 +223,13 @@ def make_move(bot, update, args):
     if name == None:
         return
 
-    # Apply the move
-    board.addEvent((date, events.move, (name, row, col)))
+    # Apply the move, noting whether or not to send an image
+    sendImage = board.addEvent((date, events.move, (name, row, col)))
 
-    # Now that we've moved, save the board and send the new image
+    # Now that we've moved, save the board and send the new image if appropriate
     save_board(board, update.message.chat_id)
-    send_board_image(bot, update)
+    if (sendImage):
+        send_board_image(bot, update)
 
     # double_reset nonsense
     bot.double_resets[str(update.message.chat_id)] = False
@@ -398,17 +399,17 @@ def new_game(bot, update):
 def confirm_resize(bot, update, args):
         # See if the number input was valid (or no number was input)
         # Only allow up to a 19 x 19 board (arbitrarily chosen)
-        try:
-            if (len(args) == 0):
+        
+            if (len(args) == 0): # Don't change the size
                 new_size = get_board(update.message.chat_id).size
+                bot.double_resets[str(update.message.chat_id)] = new_size
             elif (len(args) == 1):
-                new_size = int(args[0])
-            else:
-                raise Exception("Invalid number of arguments to new_game")
-        except:
-            bot.sendMessage( chat_id=update.message.chat_id
-                           , text="Please provide a valid number for the new board size.")
-            return
+                try:
+                    new_size = int(args[0])
+                except:
+                    bot.sendMessage( chat_id=update.message.chat_id
+                                , text="Please provide a valid number for the new board size.")
+                    return      
 
         # Check to make sure the number is okay
         if new_size not in [7, 9, 13, 17, 19]:
