@@ -205,7 +205,6 @@ class Board:
         sendImage = True
         for i in range(len(evts)):
             (date, evt, args) = evts[i]
-            print(evts[i])
             if (evt == events.undo and len(evtList) > 0):
                 evtList.pop()
                 empty()
