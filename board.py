@@ -223,6 +223,7 @@ class Board:
                     # If the last event is invalid, say so
                     sendImage = False
                 else: # Just ignore
+                    pass
             elif (len(evtList) == 0):
                 pass
             else: # Something went wrong
