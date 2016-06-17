@@ -40,11 +40,10 @@ class Board:
         self.buildGame(self.store.log())
 
     # Clears a board
-    # Just set everything to Empty, no need to reallocate memory
+    # Reallocates a Store and rebuilds the game
     def clear (self):
-        for i in range(self.size):
-            for j in range(self.size):
-                self.shortcut[i][j].player = Empty
+        self.store = Store(orderMoves)
+        self.buildGame(self.store.log())
 
     # Scores a board
     # Returns a dict with all of the player's scores
