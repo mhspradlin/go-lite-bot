@@ -183,7 +183,9 @@ class Board:
             name, row, col = move[0], move[1], move[2]
             # We already checked to make sure the space is empty, so we can
             # apply
+            print("Setting space")
             self.set(name,row,col)
+            print("Space set")
             # If we went there, take any zones that are now surrounded 
             # by the player
             # can_flood handles out of bounds indices nicely, so don't 
