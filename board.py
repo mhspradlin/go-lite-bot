@@ -220,10 +220,12 @@ class Board:
                 if (self.shortcut[row][col] == Empty and
                     row < self.size and col < self.size and
                     row >= 0 and col >= 0):
+                    print("Applying move")
                     evtList.append(args)
                     makeMove(args)
                 elif (i == len(evts) - 1):
                     # If the last event is invalid, say so
+                    print("Invalid last")
                     sendImage = False
                 else: # Just ignore
                     print("Invalid move")
