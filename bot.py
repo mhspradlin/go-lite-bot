@@ -20,12 +20,12 @@ class Bot:
         if (chat_id != None and text != None):
             r = requests.post('https://api.telegram.org/bot' + self.token +
                               '/sendMessage' +
-                              '?chat_id=' + str(chat_id)
+                              '?chat_id=' + str(chat_id) +
                               '&text='    + text)
             while r.status_code != requests.codes.ok:
                 r = requests.post('https://api.telegram.org/bot' + self.token +
                                   '/sendMessage' +
-                                  '?chat_id=' + str(chat_id)
+                                  '?chat_id=' + str(chat_id) +
                                   '&text='    + text)
     
     # Sends as photo using multipart-formdata
