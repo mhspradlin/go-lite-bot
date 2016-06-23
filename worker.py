@@ -24,7 +24,7 @@ import pickle
 from time import sleep
 
 # Our class definitions
-from bot import Bot, Worker
+from bot import Bot
 
 # Our command definitions
 from processing import load
