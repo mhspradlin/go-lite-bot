@@ -1,4 +1,4 @@
-#!venv/bin/python
+#!venv/bin/python3
 
 # Python backend for go-lite-bot, the small Go bot
 
