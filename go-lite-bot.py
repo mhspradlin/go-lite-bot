@@ -8,7 +8,7 @@ import sys
 # So we can save the board
 import os.path
 from os import mkdir, fork
-import cPickle as pickle
+import pickle
 
 # To lock and unlock files
 import fcntl

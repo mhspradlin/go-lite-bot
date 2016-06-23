@@ -17,7 +17,7 @@ import fcntl
 import os
 
 # To serialize/deserialize objects
-import cPickle as pickle
+import pickle
 
 # To yield
 from time import sleep
