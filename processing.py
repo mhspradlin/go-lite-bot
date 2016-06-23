@@ -11,7 +11,7 @@ from board import Node, Empty, Board
 
 # So we can draw the board
 from PIL import Image, ImageDraw, ImageFont
-import StringIO
+from io import StringIO
 from math import ceil
 
 # So we can save the board
