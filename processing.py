@@ -38,7 +38,7 @@ import events
 import fcntl
 
 # Things to put our definitions into
-from bot import Bot, Worker
+from bot import Bot
 
 # Size of the board
 default_board_size = 9
@@ -145,7 +145,7 @@ def make_move(bot, update, args):
     converted = convert_move(args)
     if ((len(args) != 3 and len(args) != 2) or 
             (not are_indices(converted, board.size))):
-        print "Got bad input"
+        print("Got bad input")
         return
     
     # The date of the update for our journal
