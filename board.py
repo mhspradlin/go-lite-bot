@@ -239,6 +239,7 @@ class Board:
         self.store.insert(evt)
         return self.buildGame(self.store.log())
 
-# Orders moves by UNIX time
-def orderMoves ((date1, evt1, args1), (date2, evt2, args2)):
-    return date1 < date2
+# Orders moves by Telegram-ordered ID
+# Arguments are like (date1, evt1, args1), (date2, evt2, args2) 
+def orderMoves (m1, m2):
+    return m1[0] < m2[0]
