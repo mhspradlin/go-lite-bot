@@ -6,17 +6,8 @@
 # writing files. A really extensible solution might access a database
 # instead, but that's not necessary for now.
 
-# Import the Updater class from the nice telegram API wrapper
-from telegram.ext import Updater
-
 # Our game-board abstraction
 from board import Node, Empty, Board
-
-# From the muiltipart business
-import httplib
-import mimetypes
-import urlparse
-import uuid
 
 # So we can draw the board
 from PIL import Image, ImageDraw, ImageFont
@@ -26,7 +17,7 @@ from math import ceil
 # So we can save the board
 import os.path
 from os import mkdir
-import cPickle as pickle
+import pickle
 
 # So we can pick random colors
 import random 
